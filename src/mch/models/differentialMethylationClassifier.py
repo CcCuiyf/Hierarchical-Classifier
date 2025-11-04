@@ -69,6 +69,18 @@ class DifferentialMethylation(BaseEstimator, TransformerMixin):
         print("Running analysis")
 
         # Prepare data
+        if not hasattr(X, "apply"):  # 不是 DataFrame（多半是 ndarray）
+            X = np.asarray(X)
+            if X.ndim == 1:
+                X = X.reshape(-1, 1)
+        # 尽量还原列名
+            cols = getattr(self, "feature_names_in_", None)
+            if cols is None or len(cols) != X.shape[1]:
+                cols = [f"f{i}" for i in range(X.shape[1])]
+            X = pd.DataFrame(X, columns=cols)
+
+
+
         X = X.apply(pd.to_numeric, errors='coerce')
         X = X.replace([np.inf, -np.inf], np.nan)
         X = X.dropna(axis="columns")
